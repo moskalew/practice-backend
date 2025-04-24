@@ -1,0 +1,19 @@
+{
+  "name": "note-app",
+  "version": "1.0.1",
+  "description": "This is simple NodeJS Aplication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "javascript"
+  ],
+  "author": "Andrei Moskalev <moskalev.web.dev@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@types/yargs-parser": "^21.0.3",
+    "yargs": "^17.7.2"
+  }
+}
