@@ -1,54 +1,39 @@
-const yargs = require('yargs');
+const http = require('http');
+const chalk = require('chalk');
+const fs = require('fs/promises');
+const path = require('path');
+const { addNote } = require('./notes.controller');
 
-const pkg = require('./package.json');
+const port = 4000;
 
-const {
-  addNote,
-  printNotes,
-  removeNote,
-} = require('../5. Запись в файл/notes.controller');
+const basePath = path.join(__dirname, 'pages');
 
-yargs.version(pkg.version);
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'GET') {
+    const content = await fs.readFile(path.join(basePath, 'index.html'));
+    // res.setHeader('Content-Type', 'text/html');
+    res.writeHead(200, {
+      'content-type': 'text/html',
+    });
+    res.end(content);
+  } else if (req.method === 'POST') {
+    const body = [];
 
-// Команда: add
-yargs.command({
-  command: 'add',
-  describe: 'Add new note to list',
-  builder: {
-    title: {
-      type: 'string',
-      describe: 'Note title',
-      demandOption: true,
-    },
-  },
-  handler({ title }) {
-    addNote(title);
-  },
+    req.on('data', (data) => {
+      body.push(Buffer.from(data));
+    });
+    req.on('end', () => {
+      const title = body.toString().split('=')[1].replaceAll('+', ' ');
+      addNote(title);
+      res.end(`Title = ${title}`);
+
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+      });
+    });
+  }
 });
 
-// Команда: list
-yargs.command({
-  command: 'list',
-  describe: 'Print all notes',
-  handler() {
-    printNotes();
-  },
+server.listen(port, () => {
+  console.log(chalk.green(`Server has been started on port ${port}...`));
 });
-
-// Команда: remove
-yargs.command({
-  command: 'remove',
-  describe: 'Remove note by id',
-  builder: {
-    id: {
-      type: 'string',
-      describe: 'Note unic id',
-      demandOption: true,
-    },
-  },
-  handler({ id }) {
-    removeNote(id);
-  },
-});
-
-yargs.parse();
