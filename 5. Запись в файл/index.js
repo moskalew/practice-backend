@@ -8,10 +8,10 @@ const {
   updateNote,
 } = require('./notes.controller');
 
-const port = 4000;
-
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', 'pages');
 
@@ -42,33 +42,20 @@ app.post('/', async (req, res) => {
 });
 
 app.delete('/:id', async (req, res) => {
-  console.log('id', req.params.id);
-
   await removeNote(req.params.id);
-  res.render('index', {
-    title: 'Express App',
-    notes: await getNotes(),
-    created: false,
-  });
+  res.status(200).json({ message: 'Note deleted' });
 });
 
-let notes = [
-  { id: '1746815301387', title: 'Пример' },
-  // другие заметки...
-];
-
 app.put('/:id', async (req, res) => {
-  const noteId = req.params.id;
-  const newTitle = req.body.title;
-
-  const success = await updateNote(noteId, newTitle);
-
+  const success = await updateNote(req.params.id, req.body.title);
   if (success) {
     res.status(200).json({ message: 'Note updated' });
   } else {
     res.status(404).json({ message: 'Note not found' });
   }
 });
+
+const port = 4000;
 
 app.listen(port, () => {
   console.log(chalk.green(`Server has been started on port ${port}...`));
